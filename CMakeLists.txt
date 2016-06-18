@@ -40,6 +40,11 @@ if(MAKE_SCENE)
 	add_definitions(${OpenGL_DEFINITIONS})
 endif()
 
+if(PX4_ODOMETRY)
+	message(STATUS "Building ROVIO with PX4 Odometry")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DPX4_ODOMETRY=1")
+endif()
+
 find_package(PkgConfig)
 
 find_package(yaml_cpp_catkin QUIET)

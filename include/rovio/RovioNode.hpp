@@ -83,6 +83,9 @@ class RovioNode{
   ros::Subscriber subImg1_;
   ros::Subscriber subGroundtruth_;
   ros::Publisher pubOdometry_;
+#ifdef PX4_ODOMETRY
+  ros::Publisher pubPx4Odometry_;
+#endif
   ros::Publisher pubTransform_;
   tf::TransformBroadcaster tb_;
   ros::Publisher pubPcl_;            /**<Publisher: Ros point cloud, visualizing the landmarks.*/
@@ -93,6 +96,9 @@ class RovioNode{
   // Ros Messages
   geometry_msgs::TransformStamped transformMsg_;
   nav_msgs::Odometry odometryMsg_;
+#ifdef PX4_ODOMETRY
+  geometry_msgs::PoseStamped px4PoseMsg_;
+#endif
   geometry_msgs::PoseWithCovarianceStamped extrinsicsMsg_[mtState::nMax_];
   sensor_msgs::PointCloud2 pclMsg_;
   visualization_msgs::Marker markerMsg_;
@@ -142,6 +148,9 @@ class RovioNode{
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
     pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
+#ifdef PX4_ODOMETRY
+	pubPx4Odometry_ = nh_.advertise<geometry_msgs::PoseStamped>("rovio/pose", 1);
+#endif
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubURays_ = nh_.advertise<visualization_msgs::Marker>("rovio/urays", 1 );
     for(int camID=0;camID<mtState::nCam_;camID++){
@@ -523,7 +532,23 @@ class RovioNode{
           }
           pubOdometry_.publish(odometryMsg_);
         }
+		
+#ifdef PX4_ODOMETRY
+        if(pubPx4Odometry_.getNumSubscribers() > 0 || forceOdometryPublishing_)
+        {
+          px4PoseMsg_.header.seq = msgSeq_;
+          px4PoseMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
+          px4PoseMsg_.pose.position.x = imuOutput_.WrWB()(0);
+          px4PoseMsg_.pose.position.y = imuOutput_.WrWB()(1);
+          px4PoseMsg_.pose.position.z = imuOutput_.WrWB()(2);
+          px4PoseMsg_.pose.orientation.w = imuOutput_.qBW().w();
+          px4PoseMsg_.pose.orientation.x = imuOutput_.qBW().x();
+          px4PoseMsg_.pose.orientation.y = imuOutput_.qBW().y();
+          px4PoseMsg_.pose.orientation.z = imuOutput_.qBW().z();
 
+          pubPx4Odometry_.publish(px4PoseMsg_);
+        }
+#endif
         // Send IMU pose message.
         if(pubTransform_.getNumSubscribers() > 0){
           transformMsg_.header.seq = msgSeq_;

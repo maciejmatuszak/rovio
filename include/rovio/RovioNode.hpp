@@ -534,7 +534,7 @@ class RovioNode{
         }
 		
 #ifdef PX4_ODOMETRY
-        if(pubPx4Odometry_.getNumSubscribers() > 0 || forceOdometryPublishing_)
+        if(pubPx4Odometry_.getNumSubscribers() > 0)
         {
           px4PoseMsg_.header.seq = msgSeq_;
           px4PoseMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);

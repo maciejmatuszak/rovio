@@ -32,7 +32,9 @@
 #include "lightweight_filtering/common.hpp"
 #include "lightweight_filtering/State.hpp"
 #include <opencv2/features2d/features2d.hpp>
+#if CV_MAJOR_VERSION >=3
 #include <opencv2/imgproc.hpp>
+#endif
 #include "rovio/Camera.hpp"
 #include "rovio/FeatureDistance.hpp"
 

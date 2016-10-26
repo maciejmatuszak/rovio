@@ -538,6 +538,7 @@ class RovioNode{
         {
           px4PoseMsg_.header.seq = msgSeq_;
           px4PoseMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
+          px4PoseMsg_.header.frame_id = world_frame_;
           px4PoseMsg_.pose.position.x = imuOutput_.WrWB()(0);
           px4PoseMsg_.pose.position.y = imuOutput_.WrWB()(1);
           px4PoseMsg_.pose.position.z = imuOutput_.WrWB()(2);
@@ -545,7 +546,6 @@ class RovioNode{
           px4PoseMsg_.pose.orientation.x = imuOutput_.qBW().x();
           px4PoseMsg_.pose.orientation.y = imuOutput_.qBW().y();
           px4PoseMsg_.pose.orientation.z = imuOutput_.qBW().z();
-
           pubPx4Odometry_.publish(px4PoseMsg_);
         }
 #endif

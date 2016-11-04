@@ -97,7 +97,7 @@ class RovioNode{
   geometry_msgs::TransformStamped transformMsg_;
   nav_msgs::Odometry odometryMsg_;
 #ifdef PX4_ODOMETRY
-  geometry_msgs::PoseStamped px4PoseMsg_;
+  geometry_msgs::PoseWithCovarianceStamped px4PoseMsg_;
 #endif
   geometry_msgs::PoseWithCovarianceStamped extrinsicsMsg_[mtState::nMax_];
   sensor_msgs::PointCloud2 pclMsg_;
@@ -149,7 +149,7 @@ class RovioNode{
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
     pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
 #ifdef PX4_ODOMETRY
-	pubPx4Odometry_ = nh_.advertise<geometry_msgs::PoseStamped>("rovio/pose", 1);
+        pubPx4Odometry_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("rovio/pose", 1);
 #endif
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubURays_ = nh_.advertise<visualization_msgs::Marker>("rovio/urays", 1 );
@@ -173,6 +173,9 @@ class RovioNode{
     transformMsg_.child_frame_id = imu_frame_;
     odometryMsg_.header.frame_id = world_frame_;
     odometryMsg_.child_frame_id = imu_frame_;
+#ifdef PX4_ODOMETRY
+    px4PoseMsg_.header.frame_id = world_frame_;
+#endif
     msgSeq_ = 1;
     for(int camID=0;camID<mtState::nCam_;camID++){
       extrinsicsMsg_[camID].header.frame_id = imu_frame_;
@@ -530,6 +533,7 @@ class RovioNode{
               odometryMsg_.twist.covariance[j+6*i] = imuOutputCov_(ind1,ind2);
             }
           }
+
           pubOdometry_.publish(odometryMsg_);
         }
 		
@@ -539,13 +543,23 @@ class RovioNode{
           px4PoseMsg_.header.seq = msgSeq_;
           px4PoseMsg_.header.stamp = ros::Time(mpFilter_->safe_.t_);
           px4PoseMsg_.header.frame_id = world_frame_;
-          px4PoseMsg_.pose.position.x = imuOutput_.WrWB()(0);
-          px4PoseMsg_.pose.position.y = imuOutput_.WrWB()(1);
-          px4PoseMsg_.pose.position.z = imuOutput_.WrWB()(2);
-          px4PoseMsg_.pose.orientation.w = imuOutput_.qBW().w();
-          px4PoseMsg_.pose.orientation.x = imuOutput_.qBW().x();
-          px4PoseMsg_.pose.orientation.y = imuOutput_.qBW().y();
-          px4PoseMsg_.pose.orientation.z = imuOutput_.qBW().z();
+          px4PoseMsg_.pose.pose.position.x = imuOutput_.WrWB()(0);
+          px4PoseMsg_.pose.pose.position.y = imuOutput_.WrWB()(1);
+          px4PoseMsg_.pose.pose.position.z = imuOutput_.WrWB()(2);
+          px4PoseMsg_.pose.pose.orientation.w = imuOutput_.qBW().w();
+          px4PoseMsg_.pose.pose.orientation.x = imuOutput_.qBW().x();
+          px4PoseMsg_.pose.pose.orientation.y = imuOutput_.qBW().y();
+          px4PoseMsg_.pose.pose.orientation.z = imuOutput_.qBW().z();
+          for(unsigned int i=0;i<6;i++){
+            unsigned int ind1 = mtOutput::template getId<mtOutput::_vel>()+i;
+            if(i>=3) ind1 = mtOutput::template getId<mtOutput::_ror>()+i-3;
+            for(unsigned int j=0;j<6;j++){
+              unsigned int ind2 = mtOutput::template getId<mtOutput::_vel>()+j;
+              if(j>=3) ind2 = mtOutput::template getId<mtOutput::_ror>()+j-3;
+              px4PoseMsg_.pose.covariance[j+6*i] = imuOutputCov_(ind1,ind2);
+            }
+          }
+
           pubPx4Odometry_.publish(px4PoseMsg_);
         }
 #endif

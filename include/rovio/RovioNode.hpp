@@ -149,7 +149,7 @@ class RovioNode{
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
     pubOdometry_ = nh_.advertise<nav_msgs::Odometry>("rovio/odometry", 1);
 #ifdef PX4_ODOMETRY
-        pubPx4Odometry_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("rovio/pose", 1);
+        pubPx4Odometry_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("rovio/pose_cov", 1);
 #endif
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubURays_ = nh_.advertise<visualization_msgs::Marker>("rovio/urays", 1 );

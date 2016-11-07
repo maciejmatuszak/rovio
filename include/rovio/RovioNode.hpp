@@ -270,7 +270,7 @@ class RovioNode{
     pclMsg_.is_dense = false;
 
     // PointCloud message.
-    patchMsg_.header.frame_id = "";
+    patchMsg_.header.frame_id = camera_frame_;
     patchMsg_.height = 1;               // Unordered point cloud.
     patchMsg_.width  = mtState::nMax_;  // Number of features/points.
     const int nFieldsPatch = 5;

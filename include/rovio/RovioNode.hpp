@@ -29,7 +29,6 @@
 #ifndef ROVIO_ROVIONODE_HPP_
 #define ROVIO_ROVIONODE_HPP_
 
-#define PX4_ODOMETRY
 #include <queue>
 #include <memory>
 #include <ros/ros.h>

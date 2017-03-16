@@ -143,10 +143,10 @@ class RovioNode{
     isInitialized_ = false;
 
     // Subscribe topics
-    subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
-    subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0,this);
-    subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
-    subGroundtruth_ = nh_.subscribe("pose", 1000, &RovioNode::groundtruthCallback,this);
+    subImu_ = nh_.subscribe("imu0", 1, &RovioNode::imuCallback,this);
+    subImg0_ = nh_.subscribe("cam0/image_raw", 1, &RovioNode::imgCallback0,this);
+    subImg1_ = nh_.subscribe("cam1/image_raw", 1, &RovioNode::imgCallback1,this);
+    subGroundtruth_ = nh_.subscribe("pose", 1, &RovioNode::groundtruthCallback,this);
 
     // Advertise topics
     pubTransform_ = nh_.advertise<geometry_msgs::TransformStamped>("rovio/transform", 1);
